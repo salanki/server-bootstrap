@@ -1,0 +1,74 @@
+---
+
+- name: Ensure apt cache is updated.
+  apt: update_cache=yes cache_valid_time=3600
+
+- name: "Install Packages"
+  apt:
+    pkg:
+      - git
+      - wget
+      - curl
+      - vim
+      - less
+      - mosh
+      - htop
+      - net-tools
+      - sysstat
+      - moreutils
+      - jq
+      - bc
+      - nload
+      - gpg
+    state: present
+
+- name: Allow 'sudo' group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%sudo'
+    line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+
+- name: Add psalanki user to sudo group
+  user: name=psalanki groups=sudo append=yes state=present createhome=yes shell=/bin/bash
+
+- name: Add SSH Key for Peter
+  authorized_key:
+    user: psalanki
+    state: present
+    key: https://github.com/salanki.keys
+
+- name: Install FireMotD
+  shell: >
+    curl -s https://raw.githubusercontent.com/OutsideIT/FireMotD/master/FireMotD -o /tmp/FireMotD &&
+    chmod 755 /tmp/FireMotD &&
+    /tmp/FireMotD -I -sru &&
+    /tmp/FireMotD -G Modern
+  args:
+    warn: false
+
+- name: Remove default MotD providers
+  shell: rm -rf /etc/update-motd.d/*
+  args:
+    warn: false
+
+- name: Add FireMotD motd provider
+  copy:
+    content: |
+      #!/bin/sh
+      cat /var/run/firemotd | tail -n 14
+    dest: /etc/update-motd.d/01-firemotd
+    mode: '0755'
+
+- name: Add FireMotD Cron (startup)
+  cron:
+    name: "FireMotD"
+    special_time: reboot
+    job: "/usr/local/bin/FireMotD -S; /usr/local/bin/FireMotD -t Modern -MT > /var/run/firemotd"
+
+- name: Add FireMotD Cron
+  cron:
+    name: "FireMotD"
+    minute: "*/5"
+    job: "/usr/local/bin/FireMotD -S; /usr/local/bin/FireMotD -t Modern -MT > /var/run/firemotd"

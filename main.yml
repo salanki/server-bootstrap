@@ -1,0 +1,13 @@
+---
+- hosts: all
+
+  become: yes
+  gather_facts: yes
+
+  roles:
+    - base
+
+  tasks:
+    - include_role:
+        name: docker
+#      when: docker == 'enabled'
