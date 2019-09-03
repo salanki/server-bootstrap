@@ -20,6 +20,7 @@
       - bc
       - nload
       - gpg
+      - screen
     state: present
 
 - name: Allow 'sudo' group to have passwordless sudo
