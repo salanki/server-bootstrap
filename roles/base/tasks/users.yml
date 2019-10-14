@@ -1,0 +1,12 @@
+---
+
+- name: Add {{ item.name }} user to sudo group
+  user: name={{ item.name }} groups=sudo append=yes state=present createhome=yes shell=/bin/bash
+  loop: "{{  users  }}"
+
+- name: Add SSH Key for {{ item.name }}
+  authorized_key:
+    user: "{{ item.name }}"
+    state: present
+    key: "{{ item.keyUrl }}"
+  loop: "{{  users  }}"

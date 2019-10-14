@@ -1,6 +1,6 @@
 ---
 dependencies:
-  - role: geerlingguy.ansible-role-ntp
+  - role: geerlingguy.ntp
     vars:
       ntp_enabled: true
       ntp_manage_config: true

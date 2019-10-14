@@ -19,7 +19,7 @@
       - jq
       - bc
       - nload
-      - gpg
+#      - gpg
       - screen
     state: present
 
@@ -30,15 +30,6 @@
     regexp: '^%sudo'
     line: '%sudo ALL=(ALL) NOPASSWD: ALL'
     validate: 'visudo -cf %s'
-
-- name: Add psalanki user to sudo group
-  user: name=psalanki groups=sudo append=yes state=present createhome=yes shell=/bin/bash
-
-- name: Add SSH Key for Peter
-  authorized_key:
-    user: psalanki
-    state: present
-    key: https://github.com/salanki.keys
 
 - name: Install FireMotD
   shell: >
@@ -73,3 +64,16 @@
     name: "FireMotD"
     minute: "*/5"
     job: "/usr/local/bin/FireMotD -S; /usr/local/bin/FireMotD -t Modern -MT > /var/run/firemotd"
+
+- name: User accounts
+  include_tasks:
+    file: users.yml
+  vars:
+    users:
+      - { name: psalanki, keyUrl: https://github.com/salanki.keys }
+      - { name: bventuro, keyUrl: https://github.com/brianventuro.keys }
+      - { name: deanh, keyUrl: https://github.com/dean-haw.keys }
+      - { name: kaldrich, keyUrl: https://github.com/kaldrich15.keys }
+      - { name: yitzyd, keyUrl: https://github.com/yitzyd.keys }
+      - { name: arizzo, keyUrl: https://github.com/aanthonyrizzo.keys }
+      - { name: jmerendino, keyUrl: https://github.com/jmerendino70.keys }
